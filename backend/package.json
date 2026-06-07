@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "This is the backend API for the pipeline execution system.",
+  "main": "server.js",
+  "scripts": {
+    "cli": "node src/cli.js",
+    "pipeline": "node src/cli.js",
+    "test": "node --check app.js && node --check server.js && node --check src/cli.js && node --check src/pipeline/runPipeline.js && node --check src/controllers/pipelineController.js && node --check src/services/oceanService.js && node --check src/services/prospeoService.js && node --check src/services/eazyreachService.js && node --check src/services/brevoService.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.17.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.3",
+    "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
