@@ -1,6 +1,5 @@
 import { getSimilarCompanies } from "../services/oceanService.js";
 import { searchPersons, enrichPerson } from "../services/prospeoService.js";
-import { sendEmail } from "../services/brevoService.js";
 import { delay } from "../utils/delay.js";
 
 const getDecisionMaker = (people) => {
@@ -21,10 +20,7 @@ const getDecisionMaker = (people) => {
   });
 };
 
-export const runPipeline = async (
-  domain,
-  { sendEmails = false, emailTemplate = null } = {},
-) => {
+export const runPipeline = async (domain) => {
   const oceanResponse = await getSimilarCompanies(domain);
 
   const companies = oceanResponse.companies.slice(0, 5).map((item) => ({
@@ -64,43 +60,10 @@ export const runPipeline = async (
     ...new Map(contacts.map((contact) => [contact.email, contact])).values(),
   ];
 
-  // SAFETY CHECKPOINT
-  if (!sendEmails) {
-    return {
-      readyToSend: true,
-      warning: "Preview mode. No emails have been sent.",
-      contactsFound: uniqueContacts.length,
-      contacts: uniqueContacts,
-    };
-  }
-
-  let emailsSent = 0;
-
-  for (const contact of uniqueContacts) {
-    const subject = emailTemplate.subject
-      .replaceAll("{{name}}", contact.name)
-      .replaceAll("{{company}}", contact.company)
-      .replaceAll("{{title}}", contact.title);
-
-    const body = emailTemplate.body
-      .replaceAll("{{name}}", contact.name)
-      .replaceAll("{{company}}", contact.company)
-      .replaceAll("{{title}}", contact.title);
-
-    await sendEmail({
-      toEmail: contact.email,
-      toName: contact.name,
-      companyName: contact.company,
-      subject,
-      body,
-    });
-
-    emailsSent++;
-  }
-
   return {
-    success: true,
-    emailsSent,
+    readyToSend: true,
+    warning: "Preview mode. No emails have been sent.",
     contactsFound: uniqueContacts.length,
+    contacts: uniqueContacts,
   };
 };

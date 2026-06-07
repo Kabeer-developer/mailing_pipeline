@@ -1,8 +1,10 @@
 import { runPipeline } from "../pipeline/runPipeline.js";
+import { sendEmail } from "../services/brevoService.js";
 
 export const previewPipeline = async (req, res) => {
   try {
     const { domain } = req.body;
+
     if (!domain) {
       return res.status(400).json({
         success: false,
@@ -10,14 +12,13 @@ export const previewPipeline = async (req, res) => {
       });
     }
 
-    const result = await runPipeline(domain, {
-      sendEmails: false,
-    });
+    const result = await runPipeline(domain);
 
     res.status(200).json({
       success: true,
       data: result,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -25,33 +26,54 @@ export const previewPipeline = async (req, res) => {
     });
   }
 };
+
 export const executePipeline = async (req, res) => {
   try {
-    const { domain, email } = req.body;
+    const { contacts, email } = req.body;
 
-    if (!domain) {
+    if (!contacts?.length) {
       return res.status(400).json({
         success: false,
-        message: "Domain is required",
+        message: "Contacts are required",
       });
     }
 
-    if (!email || !email.subject || !email.body) {
+    if (!email?.subject || !email?.body) {
       return res.status(400).json({
         success: false,
         message: "Email subject and body are required",
       });
     }
 
-    const result = await runPipeline(domain, {
-      sendEmails: true,
-      emailTemplate: email,
-    });
+    let emailsSent = 0;
+
+    for (const contact of contacts) {
+
+      const subject = email.subject
+        .replaceAll("{{name}}", contact.name)
+        .replaceAll("{{company}}", contact.company)
+        .replaceAll("{{title}}", contact.title);
+
+      const body = email.body
+        .replaceAll("{{name}}", contact.name)
+        .replaceAll("{{company}}", contact.company)
+        .replaceAll("{{title}}", contact.title);
+
+      await sendEmail({
+        toEmail: contact.email,
+        toName: contact.name,
+        subject,
+        body,
+      });
+
+      emailsSent++;
+    }
 
     res.status(200).json({
       success: true,
-      data: result,
+      emailsSent,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
