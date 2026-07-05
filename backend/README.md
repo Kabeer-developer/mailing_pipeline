@@ -247,29 +247,29 @@ Prospeo free tier limits are respected using delays between requests.
 
 ---
 
-## Safety Checkpoint
+# Safety Checkpoint
 
-Emails are never sent immediately.
+The pipeline uses a two-step approval process.
 
 Step 1:
 
-```http
 POST /api/pipeline/run
-```
 
-Preview contacts.
+The system discovers companies, identifies decision makers,
+retrieves verified emails, and returns a preview of contacts.
+
+No emails are sent at this stage.
 
 Step 2:
 
-```http
 POST /api/pipeline/execute
-```
 
-Send emails.
+The user submits the approved contacts along with an email template.
 
-This prevents accidental outreach.
+Only approved contacts receive outreach emails.
 
----
+This design prevents accidental outreach while avoiding repeated API calls.
+
 
 # Environment Variables
 
@@ -312,6 +312,26 @@ http://localhost:5000
 ---
 
 # API Usage
+# Optimized Execution Flow
+
+The initial design re-ran Ocean.io and Prospeo during email execution.
+
+This approach worked but consumed additional API credits.
+
+The architecture was improved so that:
+
+1. `/run` performs company discovery and contact enrichment once.
+2. Contacts are returned for review.
+3. `/execute` accepts the approved contacts directly.
+4. Only Brevo is used during email delivery.
+
+Benefits:
+
+- No duplicate Ocean API calls
+- No duplicate Prospeo API calls
+- Faster execution
+- Lower API consumption
+- Guaranteed consistency between previewed and emailed contacts
 
 ## Preview Contacts
 
@@ -364,7 +384,15 @@ POST /api/pipeline/execute
 
 ```json
 {
-  "domain": "openai.com",
+  "contacts": [
+    {
+      "company": "Unigen",
+      "domain": "unigen.com",
+      "name": "David Kwon",
+      "title": "Director",
+      "email": "dkwon@unigen.com"
+    }
+  ],
   "email": {
     "subject": "Quick question for {{company}}",
     "body": "<p>Hi {{name}},</p><p>I noticed you're working as {{title}} at {{company}}.</p><p>Would love to connect.</p><p>Regards,<br/>Kabeer</p>"
@@ -402,15 +430,16 @@ Hi David Kwon
 
 # End-to-End Workflow
 
-1. User enters domain
-2. Ocean finds similar companies
-3. Prospeo finds decision makers
-4. Prospeo enriches contacts
-5. Verified emails are retrieved
-6. Contacts are previewed
-7. User approves outreach
-8. Brevo sends emails
-9. Outreach completed
+1. User enters a seed company domain
+2. Ocean discovers similar companies
+3. Prospeo identifies decision makers
+4. Prospeo enriches contacts with verified emails
+5. Contacts are deduplicated
+6. Preview contacts are returned
+7. User reviews and approves contacts
+8. Approved contacts are submitted to execute endpoint
+9. Brevo sends personalized emails
+10. Outreach completed
 
 ---
 
