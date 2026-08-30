@@ -1,17 +1,17 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "This is the backend API for the pipeline execution system.",
+  "description": "This is the backend API for the automated outreach pipeline.",
   "main": "server.js",
   "scripts": {
     "cli": "node src/cli.js",
     "pipeline": "node src/cli.js",
-    "test": "node --check app.js && node --check server.js && node --check src/cli.js && node --check src/pipeline/runPipeline.js && node --check src/controllers/pipelineController.js && node --check src/services/oceanService.js && node --check src/services/prospeoService.js && node --check src/services/eazyreachService.js && node --check src/services/brevoService.js",
+    "test": "node --check app.js && node --check server.js && node --check src/cli.js && node --check src/pipeline/runPipeline.js && node --check src/controllers/pipelineController.js && node --check src/services/oceanService.js && node --check src/services/prospeoService.js && node --check src/services/brevoService.js",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kabeer AR",
   "license": "ISC",
   "type": "module",
   "dependencies": {
