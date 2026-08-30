@@ -8,15 +8,16 @@ export const getSimilarCompanies = async (domain) => {
         "https://api.ocean.io/v3/search/companies",
         {
           size: 5,
+
           companiesFilters: {
-            lookalikeDomains: [domain]
-          }
+            lookalikeDomains: [domain],
+          },
         },
         {
           headers: {
             "x-api-token": process.env.OCEAN_API_KEY,
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
